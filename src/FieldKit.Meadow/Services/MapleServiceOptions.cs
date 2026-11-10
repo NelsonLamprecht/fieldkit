@@ -1,6 +1,6 @@
 using Meadow.Foundation.Web.Maple;
 
-namespace FieldKit.Meadow.Services.MapleService
+namespace FieldKit.Meadow.Services
 {
     /// <summary>
     /// Per-app settings for <see cref="MapleService"/>. Every device listens on Maple's

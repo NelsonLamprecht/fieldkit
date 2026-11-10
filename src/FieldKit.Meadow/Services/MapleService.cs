@@ -7,7 +7,7 @@ using Meadow.Foundation.Web.Maple;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace FieldKit.Meadow.Services.MapleService
+namespace FieldKit.Meadow.Services
 {
     /// <summary>
     /// Runs the Maple HTTP server on the network adapter's current IP and advertises it.

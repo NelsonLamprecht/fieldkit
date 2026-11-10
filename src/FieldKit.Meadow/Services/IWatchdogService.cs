@@ -1,4 +1,4 @@
-namespace FieldKit.Meadow.Services.Watchdog
+namespace FieldKit.Meadow.Services
 {
     public interface IWatchdogService : IRunableService
     {

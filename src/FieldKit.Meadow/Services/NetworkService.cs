@@ -1,14 +1,14 @@
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace FieldKit.Meadow.Services.NetworkService
+namespace FieldKit.Meadow.Services
 {
     public class NetworkService : BaseService
     {
-        private readonly DiagnosticsService.DiagnosticsService diagnosticsService;
+        private readonly DiagnosticsService diagnosticsService;
 
         public NetworkService(Logger logger,
-            DiagnosticsService.DiagnosticsService diagnosticsService) : base(logger)
+            DiagnosticsService diagnosticsService) : base(logger)
         {
             this.diagnosticsService = diagnosticsService;
         }

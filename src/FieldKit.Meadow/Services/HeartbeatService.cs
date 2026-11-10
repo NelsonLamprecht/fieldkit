@@ -7,7 +7,7 @@ using FieldKit.Meadow.Controllers;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace FieldKit.Meadow.Services.HeartbeatService
+namespace FieldKit.Meadow.Services
 {
     /// <summary>
     /// Follows the Meadow.Core.Samples "Config_Files" heartbeat: a background loop that logs
@@ -23,12 +23,12 @@ namespace FieldKit.Meadow.Services.HeartbeatService
     public sealed class HeartbeatService : BaseService, IDisposable
     {
         private readonly INetworkAdapter networkAdapter;
-        private readonly MapleService.MapleService mapleService;
+        private readonly MapleService mapleService;
         private readonly LedController ledController;
         private readonly Stopwatch uptime = Stopwatch.StartNew();
         private CancellationTokenSource cancellationTokenSource;
 
-        public HeartbeatService(Logger logger, INetworkAdapter networkAdapter, MapleService.MapleService mapleService, LedController ledController) : base(logger)
+        public HeartbeatService(Logger logger, INetworkAdapter networkAdapter, MapleService mapleService, LedController ledController) : base(logger)
         {
             this.networkAdapter = networkAdapter;
             this.mapleService = mapleService;

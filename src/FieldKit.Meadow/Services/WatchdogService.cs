@@ -4,7 +4,7 @@ using System.Threading;
 using Meadow;
 using Meadow.Logging;
 
-namespace FieldKit.Meadow.Services.Watchdog
+namespace FieldKit.Meadow.Services
 {
     public class WatchdogService : BaseService, IWatchdogService
     {

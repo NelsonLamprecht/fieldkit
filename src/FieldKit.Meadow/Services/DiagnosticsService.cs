@@ -2,7 +2,7 @@ using Meadow;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace FieldKit.Meadow.Services.DiagnosticsService
+namespace FieldKit.Meadow.Services
 {
     public class DiagnosticsService : BaseService
     {
