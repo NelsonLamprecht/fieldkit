@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>FieldKit.Meadow</RootNamespace>
+    <AssemblyName>FieldKit.Meadow</AssemblyName>
+  </PropertyGroup>
+
+  <!-- NuGet package (shared metadata is in the repo's Directory.Build.props) -->
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>FieldKit.Meadow</PackageId>
+    <Title>FieldKit.Meadow</Title>
+    <!-- stays a prerelease while it depends on prerelease Meadow packages (NuGet warns otherwise) -->
+    <Version>0.1.0-beta</Version>
+    <Description>A starter kit for networked Meadow F7 Feather devices: a base app that owns the boot sequence (status LED, diagnostics, WiFi, watchdog, heartbeat, Maple web server with UDP discovery and GET /info), plus relay and on/off controllers.</Description>
+    <PackageTags>meadow;wilderness-labs;f7;iot;maple;watchdog</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Meadow.F7" />
+    <PackageReference Include="Meadow.Foundation" />
+    <PackageReference Include="Meadow.Foundation.Web.Maple.Server" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,42 @@
+<Project>
+  <!-- Settings every FieldKit package shares. Each package sets its own Version, Description and
+       PackageTags in its .csproj, so packages can be released independently. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- missing XML doc comments on public members aren't worth a warning each -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- the .NET analyzers' recommended rules, plus the .editorconfig code style, on every build -->
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- checks each package for accidental breaking changes (and, once a version is published, against it via PackageValidationBaselineVersion) -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+
+    <Authors>Nelson Lamprecht</Authors>
+    <Copyright>Copyright (c) 2026 Nelson Lamprecht</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/NelsonLamprecht/fieldkit</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/NelsonLamprecht/fieldkit</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Source Link (built into the .NET SDK) plus a .snupkg, so debuggers can step into the source -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- every package lands in artifacts/packages (build.ps1) -->
+    <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts/packages</PackageOutputPath>
+  </PropertyGroup>
+
+  <!-- deterministic paths in release builds made by build.ps1 or CI -->
+  <PropertyGroup Condition="'$(CI)' == 'true' Or '$(FieldKitRelease)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- CI fails on any warning, so warnings can't pile up; local builds only show them -->
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,129 @@
+# Builds and packs every FieldKit package.
+#
+# - Every push to main and every pull request: build + pack, and keep the packages as a workflow artifact.
+# - A tag named <PackageId>-v<Version> (for example FieldKit.Meadow-v0.1.0-beta): build + pack that one
+#   package and publish a GitHub Release with its .nupkg, .snupkg and assembly zip. The tag's version must
+#   match the <Version> in the package's .csproj. A version with a suffix (-beta) becomes a prerelease.
+#   If the repository has a NUGET_USER variable (your nuget.org username) and a matching Trusted Publishing
+#   policy on nuget.org, the package is also pushed to nuget.org with a short-lived key; no API key is stored.
+#
+# To release:  git tag FieldKit.Meadow-v0.1.0-beta && git push origin FieldKit.Meadow-v0.1.0-beta
+
+name: build
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ '*-v*' ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+
+jobs:
+  build:
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Build and pack
+        shell: pwsh
+        run: ./build.ps1 -Configuration Release
+
+      - name: Check formatting
+        run: dotnet format fieldkit.slnx --verify-no-changes --no-restore
+
+      # name the artifact after the package(s) it holds, for example FieldKit.Meadow.0.1.0-beta
+      - name: Name the artifact
+        id: artifact
+        run: |
+          name="$(cd artifacts/packages && ls *.nupkg | sed 's/\.nupkg$//' | paste -sd '_')"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: artifacts/packages/
+          if-no-files-found: error
+
+  release:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # to create the GitHub Release
+      id-token: write   # for nuget.org Trusted Publishing
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Read the package and version from the tag
+        id: tag
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          package="${tag%-v*}"
+          version="${tag##*-v}"
+          project="src/${package}/${package}.csproj"
+          if [ ! -f "$project" ]; then
+            echo "::error::Tag '$tag' names package '$package', but $project doesn't exist. Use <PackageId>-v<Version>."
+            exit 1
+          fi
+          csproj_version="$(dotnet msbuild "$project" -getProperty:Version)"
+          if [ "$csproj_version" != "$version" ]; then
+            echo "::error::Tag version '$version' doesn't match <Version>$csproj_version</Version> in $project."
+            exit 1
+          fi
+          prerelease=false
+          case "$version" in *-*) prerelease=true ;; esac
+          {
+            echo "package=$package"
+            echo "version=$version"
+            echo "project=$project"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and pack
+        run: |
+          dotnet build "${{ steps.tag.outputs.project }}" --configuration Release -p:FieldKitRelease=true
+          dotnet pack "${{ steps.tag.outputs.project }}" --configuration Release --no-build -p:FieldKitRelease=true
+
+      - name: Zip the assembly
+        run: |
+          package="${{ steps.tag.outputs.package }}"
+          version="${{ steps.tag.outputs.version }}"
+          output="$(dotnet msbuild "${{ steps.tag.outputs.project }}" -getProperty:TargetDir -p:Configuration=Release)"
+          (cd "$output" && zip -j "$GITHUB_WORKSPACE/artifacts/packages/$package.$version.zip" "$package.dll" "$package.pdb" "$package.xml")
+          ls -l artifacts/packages
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=(--title "${{ steps.tag.outputs.package }} ${{ steps.tag.outputs.version }}" --generate-notes --verify-tag)
+          if [ "${{ steps.tag.outputs.prerelease }}" = "true" ]; then flags+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" "${flags[@]}" artifacts/packages/*
+
+      - name: Log in to nuget.org
+        id: nuget
+        if: ${{ vars.NUGET_USER != '' }}
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Push to nuget.org
+        if: ${{ vars.NUGET_USER != '' }}
+        env:
+          NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "artifacts/packages/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
