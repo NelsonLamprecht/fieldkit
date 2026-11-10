@@ -38,9 +38,16 @@ jobs:
       - name: Build and pack
         run: ./build.sh Release
 
+      # name the artifact after the package(s) it holds, for example FieldKit.Meadow.0.1.0-beta
+      - name: Name the artifact
+        id: artifact
+        run: |
+          name="$(cd artifacts/packages && ls *.nupkg | sed 's/\.nupkg$//' | paste -sd '_')"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
       - uses: actions/upload-artifact@v7
         with:
-          name: packages
+          name: ${{ steps.artifact.outputs.name }}
           path: artifacts/packages/
           if-no-files-found: error
 
