@@ -103,7 +103,7 @@ An app that uses FieldKit.Meadow must list it in `app.build.yaml` under `Deploy:
 ## CI and releases
 
 - `.github/workflows/build.yml` runs `build.ps1` and the format check on every push to `main` and every pull request.
-- A tag named `<PackageId>-v<Version>` releases that package: it must match the `.csproj` `Version`. nuget.org publishing uses Trusted Publishing with the `NUGET_USER` repository variable; never add an API key secret.
+- A tag named `<PackageId>-v<Version>` releases that package: it must match the `.csproj` `Version`. The release goes to GitHub Releases and GitHub Packages (with the workflow's own `GITHUB_TOKEN`). nuget.org publishing is optional and uses Trusted Publishing with the `NUGET_USER` repository variable; never add an API key secret.
 - Keep every action on its newest major version, so runs show no deprecation warnings.
 
 ## Writing docs and PRs

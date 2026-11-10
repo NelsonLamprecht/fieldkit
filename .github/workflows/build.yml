@@ -4,6 +4,7 @@
 # - A tag named <PackageId>-v<Version> (for example FieldKit.Meadow-v0.1.0-beta): build + pack that one
 #   package and publish a GitHub Release with its .nupkg, .snupkg and assembly zip. The tag's version must
 #   match the <Version> in the package's .csproj. A version with a suffix (-beta) becomes a prerelease.
+#   The package is pushed to GitHub Packages (https://nuget.pkg.github.com/NelsonLamprecht/index.json).
 #   If the repository has a NUGET_USER variable (your nuget.org username) and a matching Trusted Publishing
 #   policy on nuget.org, the package is also pushed to nuget.org with a short-lived key; no API key is stored.
 #
@@ -61,6 +62,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write   # to create the GitHub Release
+      packages: write   # to push to GitHub Packages
       id-token: write   # for nuget.org Trusted Publishing
     steps:
       - uses: actions/checkout@v7
@@ -114,6 +116,12 @@ jobs:
           flags=(--title "${{ steps.tag.outputs.package }} ${{ steps.tag.outputs.version }}" --generate-notes --verify-tag)
           if [ "${{ steps.tag.outputs.prerelease }}" = "true" ]; then flags+=(--prerelease); fi
           gh release create "$GITHUB_REF_NAME" "${flags[@]}" artifacts/packages/*
+
+      # GitHub Packages has no symbol server, so only the .nupkg goes there
+      - name: Push to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: dotnet nuget push "artifacts/packages/*.nupkg" --api-key "$GITHUB_TOKEN" --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --no-symbols --skip-duplicate
 
       - name: Log in to nuget.org
         id: nuget
