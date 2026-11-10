@@ -26,7 +26,20 @@ To try a package in another project before publishing it, add `artifacts/package
 dotnet nuget add source /path/to/fieldkit/artifacts/packages --name fieldkit-local
 ```
 
-To publish to nuget.org:
+## Releasing
+
+GitHub Actions (`.github/workflows/build.yml`) builds and packs on every push to `main` and every pull request, and keeps the packages as a workflow artifact.
+
+To release a package, set its `<Version>` in its `.csproj`, merge, then push a tag named `<PackageId>-v<Version>`:
+
+```bash
+git tag FieldKit.Meadow-v0.1.0-beta
+git push origin FieldKit.Meadow-v0.1.0-beta
+```
+
+The workflow checks the tag matches the `.csproj` version, then creates a GitHub Release for the tag with the `.nupkg`, the `.snupkg` symbols package and a zip of the assembly (`.dll`, `.pdb`, `.xml`). A version with a suffix such as `-beta` is marked as a prerelease. If the repository has a `NUGET_API_KEY` secret (Settings, Secrets and variables, Actions), the package is also pushed to nuget.org; without it, the release is GitHub only.
+
+To publish to nuget.org by hand instead:
 
 ```bash
 dotnet nuget push "artifacts/packages/*.nupkg" --api-key <your key> --source https://api.nuget.org/v3/index.json
