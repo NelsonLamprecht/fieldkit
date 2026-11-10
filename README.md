@@ -8,17 +8,13 @@ Reusable .NET building blocks for small networked devices. Each board family get
 
 ## Building the packages
 
-You need the .NET 10 SDK. From the repository root:
+You need the .NET 10 SDK and PowerShell 7 (`pwsh`, on Windows, macOS or Linux). From the repository root:
 
 ```powershell
-./build.ps1                  # Windows / PowerShell
+./build.ps1
 ```
 
-```bash
-./build.sh                   # macOS / Linux
-```
-
-Both restore, build and pack `fieldkit.slnx` in Release and put every `.nupkg` (and its `.snupkg` symbols package) in `artifacts/packages`. Pass `-Configuration Debug` (or `./build.sh Debug`) for a debug build.
+It restores, builds and packs `fieldkit.slnx` in Release and puts every `.nupkg` (and its `.snupkg` symbols package) in `artifacts/packages`. Pass `-Configuration Debug` for a debug build.
 
 To try a package in another project before publishing it, add `artifacts/packages` as a local NuGet source:
 
@@ -37,7 +33,12 @@ git tag FieldKit.Meadow-v0.1.0-beta
 git push origin FieldKit.Meadow-v0.1.0-beta
 ```
 
-The workflow checks the tag matches the `.csproj` version, then creates a GitHub Release for the tag with the `.nupkg`, the `.snupkg` symbols package and a zip of the assembly (`.dll`, `.pdb`, `.xml`). A version with a suffix such as `-beta` is marked as a prerelease. If the repository has a `NUGET_API_KEY` secret (Settings, Secrets and variables, Actions), the package is also pushed to nuget.org; without it, the release is GitHub only.
+The workflow checks the tag matches the `.csproj` version, then creates a GitHub Release for the tag with the `.nupkg`, the `.snupkg` symbols package and a zip of the assembly (`.dll`, `.pdb`, `.xml`). A version with a suffix such as `-beta` is marked as a prerelease. The release can also push to nuget.org using [Trusted Publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing), so no API key is stored anywhere. To turn it on:
+
+1. On nuget.org, open your account's **Trusted Publishing** page and add a policy for repository owner `NelsonLamprecht`, repository `fieldkit`, workflow file `build.yml`.
+2. In this repository, add an Actions **variable** (Settings, Secrets and variables, Actions, Variables) named `NUGET_USER` with your nuget.org username.
+
+Without `NUGET_USER`, releases are GitHub only.
 
 To publish to nuget.org by hand instead:
 

@@ -3,7 +3,7 @@ using Meadow.Logging;
 
 namespace FieldKit.Meadow.Services.NetworkService
 {
-    public class NetworkService: BaseService
+    public class NetworkService : BaseService
     {
         private readonly DiagnosticsService.DiagnosticsService diagnosticsService;
 

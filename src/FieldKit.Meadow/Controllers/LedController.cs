@@ -24,13 +24,13 @@ namespace FieldKit.Meadow.Controllers
     ///
     /// The LED is off before Initialize(), while Meadow OS itself boots: no app code runs then.
     /// </summary>
-    public class LedController : BaseController, IOnOrOffController, IDisposable
+    public sealed class LedController : BaseController, IOnOrOffController, IDisposable
     {
         private readonly IMeadowDevice device;
 
         OnboardRgbLed led;
 
-        bool initialized = false;
+        bool initialized;
 
         public LedController(Logger logger, IMeadowDevice device) : base(logger)
         {
@@ -340,7 +340,7 @@ namespace FieldKit.Meadow.Controllers
             Led.Animate(StartRunningColors);
         }
 
-        protected async Task StartRunningColors(CancellationToken cancellationToken)
+        private async Task StartRunningColors(CancellationToken cancellationToken)
         {
             try
             {
@@ -359,7 +359,7 @@ namespace FieldKit.Meadow.Controllers
         // shared so back-to-back calls don't get the same time-based seed (and color)
         private static readonly Random _random = new Random();
 
-        protected Color GetRandomColor()
+        private static Color GetRandomColor()
         {
             // hue is in degrees (0-360), not 0-1
             return Color.FromHsba((float)(_random.NextDouble() * 360), 1, 1);

@@ -1,18 +1,16 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-
-using Meadow;
-using Meadow.Devices;
-using Meadow.Hardware;
-using Meadow.Logging;
-
 using FieldKit.Meadow.Controllers;
 using FieldKit.Meadow.Services.DiagnosticsService;
 using FieldKit.Meadow.Services.HeartbeatService;
 using FieldKit.Meadow.Services.MapleService;
 using FieldKit.Meadow.Services.NetworkService;
 using FieldKit.Meadow.Services.Watchdog;
+using Meadow;
+using Meadow.Devices;
+using Meadow.Hardware;
+using Meadow.Logging;
 
 namespace FieldKit.Meadow
 {
@@ -22,7 +20,7 @@ namespace FieldKit.Meadow
     /// own hardware, then creates the network services. <see cref="Run"/> starts the watchdog
     /// and heartbeat and waits for WiFi; <see cref="OnNetworkConnected"/> starts Maple.
     /// </summary>
-    public abstract class MeadowBase: App<F7FeatherV1>
+    public abstract class MeadowBase : App<F7FeatherV1>
     {
         protected Logger Logger { get; } = Resolver.Log;
 
@@ -31,7 +29,7 @@ namespace FieldKit.Meadow
         /// <summary>Time since the app object was created, for the "@ 00:00:04" log timestamps.</summary>
         protected Stopwatch BootStopwatch { get; } = Stopwatch.StartNew();
 
-        public MeadowBase() { }
+        protected MeadowBase() { }
 
         /// <summary>Used if app.config.yaml is missing or doesn't have an App.DeviceName entry.</summary>
         protected abstract string DefaultDeviceName { get; }

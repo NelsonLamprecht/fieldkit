@@ -4,7 +4,7 @@ using Meadow.Logging;
 
 namespace FieldKit.Meadow.Services
 {
-    public class BaseService: IRunableService
+    public class BaseService : IRunableService
     {
         public BaseService(Logger logger)
         {

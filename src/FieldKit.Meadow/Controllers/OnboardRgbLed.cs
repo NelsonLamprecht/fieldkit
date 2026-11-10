@@ -17,7 +17,7 @@ namespace FieldKit.Meadow.Controllers
     /// When the device isn't an F7FeatherV1 there is no LED, so every method is a no-op
     /// instead of a NullReferenceException (see <see cref="IsAvailable"/>).
     /// </summary>
-    public class OnboardRgbLed : IOnOrOffController, IDisposable
+    public sealed class OnboardRgbLed : IOnOrOffController, IDisposable
     {
         private static readonly TimeSpan DefaultBlinkPeriod = TimeSpan.FromMilliseconds(500);
 
@@ -149,6 +149,8 @@ namespace FieldKit.Meadow.Controllers
                 // cancelled or faulted; either way it's finished
             }
             animationTask = null;
+            cancellationTokenSource?.Dispose();
+            cancellationTokenSource = null;
 
             // StopAnimation() only completes once the animation thread has exited, so wait
             // for it: otherwise a final brightness write from that thread can land after the
@@ -171,6 +173,8 @@ namespace FieldKit.Meadow.Controllers
         public void Dispose()
         {
             cancellationTokenSource?.Cancel();
+            cancellationTokenSource?.Dispose();
+            cancellationTokenSource = null;
             led?.Dispose();
         }
     }

@@ -1,6 +1,6 @@
 namespace FieldKit.Meadow.Services.Watchdog
 {
-    public interface IWatchdogService: IRunableService
+    public interface IWatchdogService : IRunableService
     {
         // device will reset inSeconds if not petted
         void Enable(int inSeconds);

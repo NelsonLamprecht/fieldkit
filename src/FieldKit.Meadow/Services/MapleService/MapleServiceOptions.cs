@@ -8,7 +8,7 @@ namespace FieldKit.Meadow.Services.MapleService
     /// </summary>
     public class MapleServiceOptions
     {
-        // Maple's own default; the remote app sends to this port
+        // Maple's own default, so clients find it without configuration
         public const int DefaultPort = 5417;
 
         public int Port { get; set; } = DefaultPort;

@@ -3,11 +3,9 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-
+using FieldKit.Meadow.Controllers;
 using Meadow.Hardware;
 using Meadow.Logging;
-
-using FieldKit.Meadow.Controllers;
 
 namespace FieldKit.Meadow.Services.HeartbeatService
 {
@@ -22,7 +20,7 @@ namespace FieldKit.Meadow.Services.HeartbeatService
     /// LED green when it is (<see cref="LedController.PulseHealthy"/>). If the flashes stop,
     /// one of those failed or the app has hung.
     /// </summary>
-    public class HeartbeatService : BaseService, IDisposable
+    public sealed class HeartbeatService : BaseService, IDisposable
     {
         private readonly INetworkAdapter networkAdapter;
         private readonly MapleService.MapleService mapleService;
@@ -112,7 +110,7 @@ namespace FieldKit.Meadow.Services.HeartbeatService
 
                         if (TestRestartAfterBeats.HasValue && beats >= TestRestartAfterBeats.Value)
                         {
-                            throw new Exception("Testing restart...");
+                            throw new InvalidOperationException("Testing restart...");
                         }
                     }
 
@@ -168,6 +166,7 @@ namespace FieldKit.Meadow.Services.HeartbeatService
         public void Dispose()
         {
             cancellationTokenSource?.Cancel();
+            cancellationTokenSource?.Dispose();
         }
     }
 }

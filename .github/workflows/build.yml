@@ -4,7 +4,8 @@
 # - A tag named <PackageId>-v<Version> (for example FieldKit.Meadow-v0.1.0-beta): build + pack that one
 #   package and publish a GitHub Release with its .nupkg, .snupkg and assembly zip. The tag's version must
 #   match the <Version> in the package's .csproj. A version with a suffix (-beta) becomes a prerelease.
-#   If the repository has a NUGET_API_KEY secret, the package is also pushed to nuget.org.
+#   If the repository has a NUGET_USER variable (your nuget.org username) and a matching Trusted Publishing
+#   policy on nuget.org, the package is also pushed to nuget.org with a short-lived key; no API key is stored.
 #
 # To release:  git tag FieldKit.Meadow-v0.1.0-beta && git push origin FieldKit.Meadow-v0.1.0-beta
 
@@ -36,7 +37,11 @@ jobs:
           global-json-file: global.json
 
       - name: Build and pack
-        run: ./build.sh Release
+        shell: pwsh
+        run: ./build.ps1 -Configuration Release
+
+      - name: Check formatting
+        run: dotnet format fieldkit.slnx --verify-no-changes --no-restore
 
       # name the artifact after the package(s) it holds, for example FieldKit.Meadow.0.1.0-beta
       - name: Name the artifact
@@ -56,8 +61,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write   # to create the GitHub Release
-    env:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      id-token: write   # for nuget.org Trusted Publishing
     steps:
       - uses: actions/checkout@v7
 
@@ -111,6 +115,15 @@ jobs:
           if [ "${{ steps.tag.outputs.prerelease }}" = "true" ]; then flags+=(--prerelease); fi
           gh release create "$GITHUB_REF_NAME" "${flags[@]}" artifacts/packages/*
 
+      - name: Log in to nuget.org
+        id: nuget
+        if: ${{ vars.NUGET_USER != '' }}
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
       - name: Push to nuget.org
-        if: ${{ env.NUGET_API_KEY != '' }}
+        if: ${{ vars.NUGET_USER != '' }}
+        env:
+          NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
         run: dotnet nuget push "artifacts/packages/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate

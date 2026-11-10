@@ -11,7 +11,7 @@ namespace FieldKit.Meadow.Controllers
     /// On pulls the pin low, which energizes the relay. Off lets the pin float, which leaves it de-energized.
     /// Starts off, and is switched off again before the port is released.
     /// </summary>
-    public class RelayOutput : IOnOrOffController, IDisposable
+    public sealed class RelayOutput : IOnOrOffController, IDisposable
     {
         private const bool PinOn = false;
         private const bool PinOff = true;
