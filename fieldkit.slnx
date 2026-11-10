@@ -7,6 +7,7 @@
     <File Path="global.json" />
     <File Path="NuGet.Config" />
     <File Path=".editorconfig" />
+    <File Path="AGENTS.md" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
