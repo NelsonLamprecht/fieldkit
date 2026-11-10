@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 using Meadow.Logging;
 
-namespace Halloween.Director.Shared.Services
+namespace FieldKit.Meadow.Services
 {
     public class BaseService: IRunableService
     {
