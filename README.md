@@ -33,6 +33,8 @@ git tag FieldKit.Meadow-v0.1.0-beta
 git push origin FieldKit.Meadow-v0.1.0-beta
 ```
 
+Or, without a clone, on GitHub: **Releases**, **Draft a new release**, type `FieldKit.Meadow-v0.1.0-beta` as a new tag on `main`, and **Publish release**. The workflow attaches the packages to that release.
+
 The workflow checks the tag matches the `.csproj` version, then:
 
 - creates a GitHub Release for the tag with the `.nupkg`, the `.snupkg` symbols package and a zip of the assembly (`.dll`, `.pdb`, `.xml`). A version with a suffix such as `-beta` is marked as a prerelease.

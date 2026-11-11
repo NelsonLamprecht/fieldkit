@@ -9,6 +9,7 @@
 #   policy on nuget.org, the package is also pushed to nuget.org with a short-lived key; no API key is stored.
 #
 # To release:  git tag FieldKit.Meadow-v0.1.0-beta && git push origin FieldKit.Meadow-v0.1.0-beta
+#   or on GitHub: Releases, Draft a new release, create the tag FieldKit.Meadow-v0.1.0-beta, Publish.
 
 name: build
 
@@ -17,6 +18,8 @@ on:
     branches: [ main ]
     tags: [ '*-v*' ]
   pull_request:
+  release:
+    types: [ published ]
   workflow_dispatch:
 
 permissions:
@@ -60,6 +63,11 @@ jobs:
   release:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-24.04
+    # a release published on the Releases page also pushes its tag; run once per tag at a time,
+    # and every step below is safe to repeat
+    concurrency:
+      group: release-${{ github.ref_name }}
+      cancel-in-progress: false
     permissions:
       contents: write   # to create the GitHub Release
       packages: write   # to push to GitHub Packages
@@ -109,13 +117,20 @@ jobs:
           (cd "$output" && zip -j "$GITHUB_WORKSPACE/artifacts/packages/$package.$version.zip" "$package.dll" "$package.pdb" "$package.xml")
           ls -l artifacts/packages
 
-      - name: Create the GitHub Release
+      # works whether the tag was pushed (the release is created here) or the release was published on
+      # GitHub's Releases page (the files are attached to it)
+      - name: Create or update the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          flags=(--title "${{ steps.tag.outputs.package }} ${{ steps.tag.outputs.version }}" --generate-notes --verify-tag)
-          if [ "${{ steps.tag.outputs.prerelease }}" = "true" ]; then flags+=(--prerelease); fi
-          gh release create "$GITHUB_REF_NAME" "${flags[@]}" artifacts/packages/*
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" artifacts/packages/* --clobber
+            if [ "${{ steps.tag.outputs.prerelease }}" = "true" ]; then gh release edit "$GITHUB_REF_NAME" --prerelease; fi
+          else
+            flags=(--title "${{ steps.tag.outputs.package }} ${{ steps.tag.outputs.version }}" --generate-notes --verify-tag)
+            if [ "${{ steps.tag.outputs.prerelease }}" = "true" ]; then flags+=(--prerelease); fi
+            gh release create "$GITHUB_REF_NAME" "${flags[@]}" artifacts/packages/*
+          fi
 
       # GitHub Packages has no symbol server, so only the .nupkg goes there
       - name: Push to GitHub Packages
